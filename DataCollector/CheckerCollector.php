@@ -64,6 +64,11 @@ class CheckerCollector extends DataCollector
                 ) {
                     $patch = $tag['name'];
                 }
+
+                // Break iterating if current version has been found to improve performance
+                if (version_compare($matches['tag_name'], $current, '=')) {
+                    break;
+                }
             }
         }
 
