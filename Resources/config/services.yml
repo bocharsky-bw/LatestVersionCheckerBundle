@@ -1,0 +1,9 @@
+parameters:
+    bw_latest_version_checker_template: 'BWLatestVersionCheckerBundle:Checker:profiler.html.twig'
+
+services:
+    bw_latest_version_checker.data_collector.checker:
+        class: BW\LatestVersionCheckerBundle\DataCollector\CheckerCollector
+        arguments: []
+        tags:
+            - { name: data_collector, template: '%bw_latest_version_checker_template%', id: 'bw_latest_version_checker' }
