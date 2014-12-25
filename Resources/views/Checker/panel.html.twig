@@ -17,15 +17,15 @@
     <tbody>
         <tr>
             <td>
-                {% if collector.patchVersion or collector.minorVersion or collector.majorVersion %}
-                    <h2>Can be updated!</h2>
-                    <p>
-                        Your <strong>symfony/symfony</strong> package can be updated now to the latest available version.
-                    </p>
-                {% else %}
+                {% if collector.isUpToDate %}
                     <h2>Up-to-date!</h2>
                     <p>
                         Your <strong>symfony/symfony</strong> package already has the latest available version.
+                    </p>
+                {% else %}
+                    <h2>Can be updated!</h2>
+                    <p>
+                        Your <strong>symfony/symfony</strong> package can be updated now to the latest available version.
                     </p>
                 {% endif %}
             </td>
@@ -33,12 +33,12 @@
     </tbody>
 </table>
 
-{% if collector.patchVersion or collector.minorVersion or collector.majorVersion %}
+{% if not collector.isUpToDate %}
     <table>
         <thead>
-            <th style="width: 10%;">Semantic name</th>
-            <th style="width: 10%;">Available version</th>
-            <th>Description</th>
+            <th style="width: 20%;">Semantic name</th>
+            <th style="width: 20%;">Available version</th>
+            <th>Disclaimer</th>
         </thead>
         <tbody>
             {% if collector.patchVersion %}
@@ -82,6 +82,4 @@
             {% endif %}
         </tbody>
     </table>
-{% else %}
-
 {% endif %}

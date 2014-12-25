@@ -41,7 +41,6 @@ class CheckerCollector extends DataCollector
         $minor = null;
         $patch = null;
         $current = $this->data['current_version'];
-
         /** @var array $tag */
         foreach ($tags as $tag) {
             if (preg_match('/^(?<tag_name>v\d+\.\d+\.\d+)$/i', $tag['name'], $matches)) {
@@ -71,10 +70,15 @@ class CheckerCollector extends DataCollector
                 }
             }
         }
-
         $this->data['major_version'] = $major;
         $this->data['minor_version'] = $minor;
         $this->data['patch_version'] = $patch;
+        $this->data['is_up_to_date'] = !($patch or $minor or $major);
+    }
+
+    public function isUpToDate()
+    {
+        return $this->data['is_up_to_date'];
     }
 
     /**
