@@ -14,44 +14,74 @@
 </table>
 
 <table>
-    <thead>
-        <th style="width: 10%;">Semantic name</th>
-        <th style="width: 10%;">Available version</th>
-        <th>Description</th>
-    </thead>
     <tbody>
         <tr>
-            <th>
-                Patch
-            </th>
             <td>
-                {{ collector.patchVersion }}
-            </td>
-            <td>
-                <i>The latest available version with a <b>backwards-compatible</b> bug fixes</i>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Minor
-            </th>
-            <td>
-                {{ collector.minorVersion }}
-            </td>
-            <td>
-                <i>The latest available version with a <b>backwards-compatible</b> additional functionality</i>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Major
-            </th>
-            <td>
-                {{ collector.majorVersion }}
-            </td>
-            <td>
-                <i>The latest available version with <b>incompatible</b> API changes</i>
+                {% if collector.patchVersion or collector.minorVersion or collector.majorVersion %}
+                    <h2>Can be updated!</h2>
+                    <p>
+                        Your <strong>symfony/symfony</strong> package can be updated now to the latest available version.
+                    </p>
+                {% else %}
+                    <h2>Up-to-date!</h2>
+                    <p>
+                        Your <strong>symfony/symfony</strong> package already has the latest available version.
+                    </p>
+                {% endif %}
             </td>
         </tr>
     </tbody>
 </table>
+
+{% if collector.patchVersion or collector.minorVersion or collector.majorVersion %}
+    <table>
+        <thead>
+            <th style="width: 10%;">Semantic name</th>
+            <th style="width: 10%;">Available version</th>
+            <th>Description</th>
+        </thead>
+        <tbody>
+            {% if collector.patchVersion %}
+                <tr>
+                    <th>
+                        Patch
+                    </th>
+                    <td>
+                        {{ collector.patchVersion }}
+                    </td>
+                    <td>
+                        <i>The latest available version with a <b>backwards-compatible</b> bug fixes</i>
+                    </td>
+                </tr>
+            {% endif %}
+            {% if collector.minorVersion %}
+                <tr>
+                    <th>
+                        Minor
+                    </th>
+                    <td>
+                        {{ collector.minorVersion }}
+                    </td>
+                    <td>
+                        <i>The latest available version with a <b>backwards-compatible</b> additional functionality</i>
+                    </td>
+                </tr>
+            {% endif %}
+            {% if collector.majorVersion %}
+                <tr>
+                    <th>
+                        Major
+                    </th>
+                    <td>
+                        {{ collector.majorVersion }}
+                    </td>
+                    <td>
+                        <i>The latest available version with <b>incompatible</b> API changes</i>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+{% else %}
+
+{% endif %}
