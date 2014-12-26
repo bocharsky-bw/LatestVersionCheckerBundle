@@ -28,38 +28,36 @@ class CheckerCollector extends DataCollector
      */
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
+        // Get tags from GitHub API
         $client = new Client();
         /** @var Repo $repo */
-        $repo = $client->api('repos');
+        $repo = $client->api('repo');
+        $repo->setPerPage(50);
         $tags = $repo->tags('symfony', 'symfony');
 
-        $this->data = [
-            'current_version' => 'v' . Kernel::VERSION,
-        ];
+        $current = 'v' . Kernel::VERSION;
+        $currentSegments = $this->splitVersion($current);
 
         $major = null;
         $minor = null;
         $patch = null;
-        $current = $this->data['current_version'];
+        $minorLimit = $this->calculateMinorLimitVersion($currentSegments);
+        $patchLimit = $this->calculatePatchLimitVersion($currentSegments);
         /** @var array $tag */
         foreach ($tags as $tag) {
             if (preg_match('/^(?<tag_name>v\d+\.\d+\.\d+)$/i', $tag['name'], $matches)) {
-                if (true
-                    and version_compare($matches['tag_name'], (isset($major) ? $major : $this->getMinorLimitVersion()), '>')
-                ) {
+                if (version_compare($matches['tag_name'], (isset($major) ? $major : $minorLimit), '>')) {
                     $major = $tag['name'];
                 }
 
-                if (true
-                    and version_compare($matches['tag_name'], (isset($minor) ? $minor : $current), '>')
-                    and version_compare($matches['tag_name'], $this->getMinorLimitVersion(), '<')
+                if (version_compare($matches['tag_name'], (isset($minor) ? $minor : $current), '>')
+                    and version_compare($matches['tag_name'], $minorLimit, '<')
                 ) {
                     $minor = $tag['name'];
                 }
 
-                if (true
-                    and version_compare($matches['tag_name'], (isset($patch) ? $patch : $current), '>')
-                    and version_compare($matches['tag_name'], $this->getPatchLimitVersion(), '<')
+                if (version_compare($matches['tag_name'], (isset($patch) ? $patch : $current), '>')
+                    and version_compare($matches['tag_name'], $patchLimit, '<')
                 ) {
                     $patch = $tag['name'];
                 }
@@ -70,12 +68,18 @@ class CheckerCollector extends DataCollector
                 }
             }
         }
+        unset($tags); // clear memory
+
+        $this->data['current_version'] = $current;
         $this->data['major_version'] = $major;
         $this->data['minor_version'] = $minor;
         $this->data['patch_version'] = $patch;
         $this->data['is_up_to_date'] = !($patch or $minor or $major);
     }
 
+    /**
+     * @return bool
+     */
     public function isUpToDate()
     {
         return $this->data['is_up_to_date'];
@@ -89,50 +93,25 @@ class CheckerCollector extends DataCollector
         return $this->data['current_version'];
     }
 
-    public function getSemanticVersionArray()
-    {
-        $default = [
-            'major' => 0,
-            'minor' => 0,
-            'patch' => 0,
-        ];
-        $current = [];
-        if (preg_match('/^v(\d+)\.(\d+)\.(\d+)/i', $this->data['current_version'], $matches)) {
-            $current['major'] = (int)$matches[1];
-            $current['minor'] = (int)$matches[2];
-            $current['patch'] = (int)$matches[3];
-        }
-
-        return array_merge($default, $current);
-    }
-
-    /** Redundant */
-    //public function getMajorLimitVersion() {}
-
-    public function getMinorLimitVersion()
-    {
-        $version = $this->getSemanticVersionArray();
-
-        return sprintf('v%d.%d.%d', $version['major'] + 1, 0, 0);
-    }
-
-    public function getPatchLimitVersion()
-    {
-        $version = $this->getSemanticVersionArray();
-
-        return sprintf('v%d.%d.%d', $version['major'], $version['minor'] + 1, 0);
-    }
-
+    /**
+     * @return string
+     */
     public function getMajorVersion()
     {
         return $this->data['major_version'];
     }
 
+    /**
+     * @return string
+     */
     public function getMinorVersion()
     {
         return $this->data['minor_version'];
     }
 
+    /**
+     * @return string
+     */
     public function getPatchVersion()
     {
         return $this->data['patch_version'];
@@ -144,5 +123,47 @@ class CheckerCollector extends DataCollector
     public function getName()
     {
         return 'bw_latest_version_checker';
+    }
+
+    /**
+     * @param string $version
+     * @return array
+     */
+    protected function splitVersion($version)
+    {
+        $default = [
+            'major' => 0,
+            'minor' => 0,
+            'patch' => 0,
+        ];
+        $segments = [];
+        if (preg_match('/^v(\d+)\.(\d+)\.(\d+)/i', $version, $matches)) {
+            $segments['major'] = (int)$matches[1];
+            $segments['minor'] = (int)$matches[2];
+            $segments['patch'] = (int)$matches[3];
+        }
+
+        return array_merge($default, $segments);
+    }
+
+    /** Redundant */
+    //protected function getMajorLimitVersion() {}
+
+    /**
+     * @param array $segments
+     * @return string
+     */
+    protected function calculateMinorLimitVersion(array $segments)
+    {
+        return sprintf('v%d.%d.%d', $segments['major'] + 1, 0, 0);
+    }
+
+    /**
+     * @param array $segments
+     * @return string
+     */
+    protected function calculatePatchLimitVersion(array $segments)
+    {
+        return sprintf('v%d.%d.%d', $segments['major'], $segments['minor'] + 1, 0);
     }
 }
