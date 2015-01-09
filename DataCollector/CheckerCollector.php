@@ -46,20 +46,20 @@ class CheckerCollector extends DataCollector
         /** @var array $tag */
         foreach ($tags as $tag) {
             if (preg_match('/^(?<tag_name>v\d+\.\d+\.\d+)$/i', $tag['name'], $matches)) {
-                if (version_compare($matches['tag_name'], (isset($major) ? $major : $minorLimit), '>')) {
-                    $major = $tag['name'];
+                if (version_compare($matches['tag_name'], (isset($patch) ? $patch : $current), '>')
+                    and version_compare($matches['tag_name'], $patchLimit, '<')
+                ) {
+                    $patch = $tag['name'];
                 }
 
-                if (version_compare($matches['tag_name'], (isset($minor) ? $minor : $current), '>')
+                if (version_compare($matches['tag_name'], (isset($minor) ? $minor : $patchLimit), '>=')
                     and version_compare($matches['tag_name'], $minorLimit, '<')
                 ) {
                     $minor = $tag['name'];
                 }
 
-                if (version_compare($matches['tag_name'], (isset($patch) ? $patch : $current), '>')
-                    and version_compare($matches['tag_name'], $patchLimit, '<')
-                ) {
-                    $patch = $tag['name'];
+                if (version_compare($matches['tag_name'], (isset($major) ? $major : $minorLimit), '>=')) {
+                    $major = $tag['name'];
                 }
 
                 // Break iterating if current version has been found to improve performance
