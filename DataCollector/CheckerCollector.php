@@ -35,15 +35,11 @@ class CheckerCollector extends DataCollector
     {
         $this->checker->check();
 
+        $this->data['is_up_to_date'] = $this->checker->isUpToDate();
         $this->data['current_version'] = $this->checker->getCurrent();
         $this->data['patch_version'] = $this->checker->getPatch();
         $this->data['minor_version'] = $this->checker->getMinor();
         $this->data['major_version'] = $this->checker->getMajor();
-        $this->data['is_up_to_date'] = ! (false
-            or $this->checker->getPatch()
-            or $this->checker->getMinor()
-            or $this->checker->getMajor()
-        );
     }
 
     /**

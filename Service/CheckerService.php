@@ -113,6 +113,14 @@ class CheckerService
     }
 
     /**
+     * @return bool
+     */
+    public function isUpToDate()
+    {
+        return ! ($this->patch or $this->minor or $this->major);
+    }
+
+    /**
      * @param string $version
      * @return array
      */
