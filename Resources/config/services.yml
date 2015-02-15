@@ -4,6 +4,10 @@ parameters:
 services:
     bw_latest_version_checker.data_collector.checker:
         class: BW\LatestVersionCheckerBundle\DataCollector\CheckerCollector
-        arguments: []
+        arguments: ["@bw_latest_version_checker.service.checker"]
         tags:
             - { name: data_collector, template: '%bw_latest_version_checker_template%', id: 'bw_latest_version_checker' }
+
+    bw_latest_version_checker.service.checker:
+        class: BW\LatestVersionCheckerBundle\Service\CheckerService
+        arguments: []
